@@ -60,11 +60,14 @@ async function processAllExistingImdbLinks() {
             .input("TalentId", sql.Int, TalentID)
             .input("Title", sql.NVarChar(255), credit.title)
             .input("TitleUrl", sql.NVarChar(255), credit.titleUrl)
-            .input("Year", sql.NVarChar(10), credit.year)
+            .input("fromYear", sql.NVarChar(10), credit.fromYear)
+            .input("toYear", sql.NVarChar(10), credit.toYear)
+            .input("noOfEpisodes", sql.Int, credit.noOfEpisodes)
+            .input("currentProductionStage", sql.NVarChar(50), credit.currentProductionStage)
             .input("Type", sql.NVarChar(50), credit.type)
             .input("Role", sql.NVarChar(255), credit.role).query(`
-              INSERT INTO tblImdbMetaData (TalentId, Title, TitleUrl, Year, Type, Role)
-              VALUES (@TalentId, @Title, @TitleUrl, @Year, @Type, @Role)
+              INSERT INTO tblImdbMetaData (TalentId, Title, TitleUrl, fromYear, toYear, noOfEpisodes, Type, Role, currentProductionStage)
+              VALUES (@TalentId, @Title, @TitleUrl, @fromYear, @toYear, @noOfEpisodes, @Type, @Role, @currentProductionStage)
             `);
         }
       } catch (err) {
@@ -119,9 +122,12 @@ function extractFilmographyFromHtml(html) {
     return credits;
   }
 
-  const edges = imdbJson?.props?.pageProps?.mainColumnData?.releasedPrimaryCredits?.flatMap(
-  credit => credit?.credits?.edges || []
-);
+  const released = imdbJson?.props?.pageProps?.mainColumnData?.releasedPrimaryCredits || [];
+  const unreleased = imdbJson?.props?.pageProps?.mainColumnData?.unreleasedPrimaryCredits || [];
+
+  const edges = [...released, ...unreleased].flatMap(
+    credit => credit?.credits?.edges || []
+  );
 
   if (!edges || !Array.isArray(edges)) {
     console.warn("No filmography data found in __NEXT_DATA__");
@@ -133,10 +139,14 @@ function extractFilmographyFromHtml(html) {
     const titleUrl = node?.title?.id
       ? `https://www.imdb.com/title/${node.title.id}/`
       : "";
-    const year = node?.title?.releaseYear?.year?.toString() || "";
+    const fromYear = node?.episodeCredits?.yearRange?.year.toString() || node?.title?.releaseYear?.year.toString() || '';
+    const toYear = node?.episodeCredits?.yearRange?.endYear?.toString() || null;
+    const noOfEpisodes = node?.episodeCredits?.total || 0;
     const type = node?.title?.titleType?.text || "";
-    const role = node?.characters?.[0]?.name || "";
-    credits.push({ title, titleUrl, year, type, role });
+    const role = node?.characters?.[0]?.name || node?.category?.text || "";
+    const currentProductionStage = node?.title?.productionStatus?.currentProductionStage?.text || "";
+
+    credits.push({ title, titleUrl, fromYear, toYear, noOfEpisodes, type, role, currentProductionStage });
   }
   return credits;
 }
