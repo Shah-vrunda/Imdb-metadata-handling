@@ -60,14 +60,14 @@ async function processAllExistingImdbLinks() {
             .input("TalentId", sql.Int, TalentID)
             .input("Title", sql.NVarChar(255), credit.title)
             .input("TitleUrl", sql.NVarChar(255), credit.titleUrl)
-            .input("fromYear", sql.NVarChar(10), credit.fromYear)
-            .input("toYear", sql.NVarChar(10), credit.toYear)
-            .input("noOfEpisodes", sql.Int, credit.noOfEpisodes)
-            .input("currentProductionStage", sql.NVarChar(50), credit.currentProductionStage)
+            .input("FromYear", sql.NVarChar(10), credit.fromYear)
+            .input("ToYear", sql.NVarChar(10), credit.toYear)
+            .input("NoOfEpisodes", sql.Int, credit.noOfEpisodes)
+            .input("CurrentProductionStage", sql.NVarChar(50), credit.currentProductionStage)
             .input("Type", sql.NVarChar(50), credit.type)
             .input("Role", sql.NVarChar(255), credit.role).query(`
-              INSERT INTO tblImdbMetaData (TalentId, Title, TitleUrl, fromYear, toYear, noOfEpisodes, Type, Role, currentProductionStage)
-              VALUES (@TalentId, @Title, @TitleUrl, @fromYear, @toYear, @noOfEpisodes, @Type, @Role, @currentProductionStage)
+              INSERT INTO tblImdbMetaData (TalentId, Title, TitleUrl, FromYear, ToYear, NoOfEpisodes, Type, Role, CurrentProductionStage)
+              VALUES (@TalentId, @Title, @TitleUrl, @FromYear, @ToYear, @NoOfEpisodes, @Type, @Role, @CurrentProductionStage)
             `);
         }
       } catch (err) {
