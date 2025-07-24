@@ -55,7 +55,6 @@ async function processAllExistingImdbLinks() {
 
         for (const credit of credits) {
           console.log(`Inserting credit: ${JSON.stringify(credit)}`);
-
           await pool
             .request()
             .input("TalentId", sql.Int, TalentID)
@@ -119,9 +118,11 @@ function extractFilmographyFromHtml(html) {
     console.error("Failed to parse __NEXT_DATA__ JSON:", err);
     return credits;
   }
-  const edges =
-    imdbJson?.props?.pageProps?.mainColumnData?.releasedPrimaryCredits?.[0]
-      ?.credits?.edges;
+
+  const edges = imdbJson?.props?.pageProps?.mainColumnData?.releasedPrimaryCredits?.flatMap(
+  credit => credit?.credits?.edges || []
+);
+
   if (!edges || !Array.isArray(edges)) {
     console.warn("No filmography data found in __NEXT_DATA__");
     return credits;
