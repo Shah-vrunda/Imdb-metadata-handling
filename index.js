@@ -99,7 +99,8 @@ async function fetchImdbPage(imdbId) {
 
 function extractImdbId(url) {
   if (!url) return null;
-  const match = url.match(/\/name\/(nm\d+)\//);
+  // The '?' makes the trailing slash optional
+  const match = url.match(/\/name\/(nm\d+)\/?/);
   return match ? match[1] : null;
 }
 
